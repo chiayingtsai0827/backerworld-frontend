@@ -17,57 +17,63 @@ const Cart = () => {
     setCart(cart.filter(item => item.id !== id))
   }
 
-  const generatePDF = async () => {
-  const { jsPDF } = window.jspdf
-  
-  // 動態載入中文字型（這行很重要！）
-  const fontResponse = await fetch('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.18/files/noto-sans-sc-chinese-traditional-400-normal.ttf')
-  const fontArrayBuffer = await fontResponse.arrayBuffer()
-  
-  const doc = new jsPDF('p', 'mm', 'a4')
-  doc.addFileToVFS('NotoSans.ttf', fontArrayBuffer)
-  doc.addFont('NotoSans.ttf', 'NotoSans', 'normal')
-  doc.setFont('NotoSans')
+  import jsPDF from 'jspdf'  // ← 加這行！jsPDF 載入
 
-  // 標題
-  doc.setFontSize(20)
-  doc.text('◉◉有限公司 採購訂單', 105, 20, { align: 'center' })
+const generatePDF = async () => {
+  try {
+    const doc = new jsPDF('p', 'mm', 'a4')
 
-  // 資訊
-  doc.setFontSize(12)
-  doc.text(`訂單編號：SO-${new Date().toISOString().slice(2,10).replace(/-/g,'')}-001`, 20, 35)
-  doc.text(`日期：${new Date().toLocaleDateString('zh-TW')}`, 20, 42)
+    // 動態載入中文字型
+    const fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.18/files/noto-sans-sc-chinese-traditional-400-normal.ttf'
+    const fontResponse = await fetch(fontUrl)
+    if (!fontResponse.ok) throw new Error('字型載入失敗')
+    const fontArrayBuffer = await fontResponse.arrayBuffer()
 
-  // 表格
-  let y = 60
-  doc.setFillColor(240, 240, 240)
-  doc.rect(15, 52, 180, 8, 'F') // 表頭背景
-  doc.setFontSize(11)
-  doc.text('項次', 20, 58)
-  doc.text('品名', 40, 58)
-  doc.text('數量', 100, 58, { align: 'center' })
-  doc.text('單價', 130, 58, { align: 'center' })
-  doc.text('金額', 170, 58, { align: 'center' })
+    doc.addFileToVFS('NotoSans.ttf', fontArrayBuffer)
+    doc.addFont('NotoSans.ttf', 'NotoSans', 'normal')
+    doc.setFont('NotoSans')
 
-  cart.forEach((item, i) => {
-    y += 10
-    doc.text(`${i + 1}`, 20, y)
-    doc.text(item.name, 40, y)
-    doc.text(`${item.quantity}`, 100, y, { align: 'center' })
-    doc.text(`NT$${item.price.toLocaleString()}`, 130, y, { align: 'center' })
-    doc.text(`NT$${(item.quantity * item.price).toLocaleString()}`, 170, y, { align: 'center' })
-  })
+    // 標題
+    doc.setFontSize(20)
+    doc.text('◉◉有限公司 採購訂單', 105, 20, { align: 'center' })
 
-  // 總計
-  doc.setFontSize(16)
-  doc.text(`總計：NT$ ${total.toLocaleString()}`, 170, y + 20, { align: 'center' })
+    // 資訊
+    doc.setFontSize(12)
+    doc.text(`訂單編號：SO-${new Date().toISOString().slice(0,10).replace(/-/g, '')}-001`, 20, 35)
+    doc.text(`日期：${new Date().toLocaleDateString('zh-TW')}`, 20, 42)
 
-  // 公司資訊
-  doc.setFontSize(10)
-  doc.text('公司地址：台北市◉◉路 100 號　電話：02-12345678', 20, y + 40)
-  doc.text('謝謝您的訂購！', 20, y + 50)
+    // 表格標頭
+    doc.setFontSize(11)
+    doc.text('項次', 20, 58)
+    doc.text('品名', 40, 58)
+    doc.text('數量', 100, 58, { align: 'center' })
+    doc.text('單價', 130, 58, { align: 'center' })
+    doc.text('金額', 170, 58, { align: 'center' })
 
-  doc.save(`採購訂單_${new Date().toISOString().slice(0,10)}.pdf`)
+    // 表格內容
+    let y = 70
+    cart.forEach((item, i) => {
+      doc.text(`${i + 1}`, 20, y)
+      doc.text(item.name, 40, y)
+      doc.text(`${item.quantity}`, 100, y, { align: 'center' })
+      doc.text(`NT$${item.price.toLocaleString()}`, 130, y, { align: 'center' })
+      doc.text(`NT$${(item.quantity * item.price).toLocaleString()}`, 170, y, { align: 'center' })
+      y += 10
+    })
+
+    // 總計
+    doc.setFontSize(14)
+    doc.text(`總計：NT$ ${total.toLocaleString()}`, 170, y, { align: 'center' })
+
+    // 公司資訊
+    doc.setFontSize(10)
+    doc.text('公司地址：台北市◉◉路 100 號　電話：02-12345678', 20, y + 20)
+    doc.text('謝謝您的訂購！', 20, y + 30)
+
+    doc.save(`採購訂單_${new Date().toISOString().slice(0,10)}.pdf`)
+  } catch (err) {
+    alert('PDF 生成失敗：' + err.message)
+  }
 }
 
   return (
