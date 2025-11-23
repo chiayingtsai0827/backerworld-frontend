@@ -1,0 +1,10 @@
+{
+  "themes": {
+    "blue": "#4f46e5",
+    "purple": "#8b5cf6",
+    "green": "#10b981",
+    "pink": "#ec4899",
+    "dark": "#1f2937"
+  },
+  "current": "blue"
+}
