@@ -1,0 +1,31 @@
+<div class="text-center">
+  <h2>{{company.name}} 採購訂單</h2>
+  <p>訂單編號：{{orderId}}　日期：{{date}}</p>
+</div>
+<table class="table table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>項次</th>
+      <th>品名</th>
+      <th>數量</th>
+      <th>單價</th>
+      <th>金額</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each items}}
+    <tr>
+      <td>{{@index}}</td>
+      <td>{{name}}</td>
+      <td>{{quantity}}</td>
+      <td>{{price}}</td>
+      <td>{{subtotal}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+<div class="text-end">
+  <p>總計: NT$ {{total}}</p>
+</div>
+<p>{{company.address}}　{{company.phone}}</p>
+<p>謝謝您的訂購！</p>
