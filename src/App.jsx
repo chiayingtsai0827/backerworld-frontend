@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import Products from './components/Products'
@@ -7,20 +7,17 @@ import Orders from './components/Orders'
 import { useState } from 'react'
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [theme, setTheme] = useState('blue')
+  const [user, setUser] = useState(null)
 
   return (
     <Router>
-      <div className={`min-vh-100 bg-${theme}`}>
-        <Routes>
-          <Route path="/" element={<Login setAuth={setIsAuthenticated} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/orders" element={<Orders />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={!user ? <Login setUser={setUser} /> : <Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/products" element={user ? <Products /> : <Navigate to="/" />} />
+        <Route path="/cart" element={user ? <Cart /> : <Navigate to="/" />} />
+        <Route path="/orders" element={user ? <Orders /> : <Navigate to="/" />} />
+      </Routes>
     </Router>
   )
 }
